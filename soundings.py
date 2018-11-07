@@ -9,45 +9,50 @@ Created on Fri Oct 19 10:35:40 2018
 
 import pandas as pd
 import csv
-import numpy as np
 import datetime
 import sys
 from urllib.request import Request, urlopen
-   
-#%%
-def create_url(station_id=None, year=None, month=None, from_date=None, to_date=None, region=None):
-    """Returns the url for the sounding data of the chosen
-    date and location. Default: The last sounding at Innsbruck Airport.
-    
-    Parameters:
-    -----------
-    compare download_sounding() documentation
-    
+
+
+def create_url(station_id='11120', year=None, month=None, from_date=None,
+               to_date=None, region='europe'):
+    """Returns the url for the sounding data of the chosen date and location.
+
+    Default: The last sounding at Innsbruck Airport.
+
+    Parameters
+    ----------
+    station_id : str
+        The id of the station.
+    year : str
+        A four character string indicating the year. Default: now
+    month
+    from_date
+    to_date
+    region
+
     Returns
     -------
-   the url of the data homepage as string.
+    The url of the data homepage as string.
     """
     
-    if station_id == None:
-        station_id = '11120'
-        
-    if year == None:
+    if year is None:
         year = '{:%Y}'.format(datetime.datetime.now())
 
-    if month == None:
+    if month is None:
         month = '{:%m}'.format(datetime.datetime.now())
         
-    if from_date == None:
-        from_date = from_day_time() # call function
+    if from_date is None:
+        from_date = from_day_time()
                 
-    if to_date == None:
+    if to_date is None:
         to_date = '{:%d%H}'.format(datetime.datetime.now())
-    
-    if region == None:
-        region = 'europe'
-        
-    return 'http://weather.uwyo.edu/cgi-bin/sounding?region=' + region + '&TYPE=TEXT%3ALIST&YEAR=' + year + '&MONTH=' + month + '&FROM=' + from_date + '&TO=' + to_date + '&STNM=' + station_id
-#%%
+
+    return ('http://weather.uwyo.edu/cgi-bin/sounding?region=' + region +
+            '&TYPE=TEXT%3ALIST&YEAR=' + year + '&MONTH=' + month + '&FROM=' +
+            from_date + '&TO=' + to_date + '&STNM=' + station_id)
+
+
 def from_day_time(station_id=None):
     """Used for create_url(). Returns the keyword argument for from_date if 
     it is set to None. Returns the day and hour of the last sounding 
@@ -61,9 +66,9 @@ def from_day_time(station_id=None):
     hour_now = int('{:%H}'.format(datetime.datetime.now()))
     
     if station_id == None or station_id == '11120':
-    # if there was a sounding today (and now is later than 3 a.m.) today is 
-    # chosen, else yesterday for the day (as the first sounding in Innsbruck 
-    # takes plasce at 3 o'clock) 
+        # if there was a sounding today (and now is later than 3 a.m.) today is
+        # chosen, else yesterday for the day (as the first sounding in
+        # Innsbruck takes place at 3 o'clock)
         if hour_now >= 3:
             day = '{:%d}'.format(datetime.datetime.now())
         else:
@@ -72,7 +77,7 @@ def from_day_time(station_id=None):
         # since there is only one sounding per day, hour con be set to '00'
         hour = '00'
     else:
-    # at different stations, there are 2 soundings per day
+        # at different stations, there are 2 soundings per day
         hour_start = hour_now - 12
         if hour_start < 0:
             hour_start += 24
@@ -90,7 +95,8 @@ def from_day_time(station_id=None):
         
     from_date = day + hour
     return from_date
-#%%
+
+
 def check_todays_sounding(lines):
     """ Checks if there is data of the current sounding available. If not an 
     an advice is given.
@@ -123,10 +129,11 @@ def check_todays_sounding(lines):
         return False
     else:
         return True
-#%%    
+
+
 def write_csvfile(data):
     """Preprocesses the downloaded data and writes it in a csv-file called 
-    'sounding.csv'. First only rows with data for the table are selected. Rows 
+    'rawdata.csv'. First only rows with data for the table are selected. Rows
     which do not contain all parameters are deleted. Then the csv-file will be 
     created.
     
@@ -137,7 +144,7 @@ def write_csvfile(data):
     
     Returns
     -------
-    a csv-file called sounding.csv, which contains a table of the sounding 
+    a csv-file called rawdata.csv, which contains a table of the sounding
     data.
     """
     # find the first row of interest, which is the head of the table
@@ -169,16 +176,17 @@ def write_csvfile(data):
         if len(element) < 11:
             pretable.remove(element)
 
-    # create a csv-file called sounding.csv which contains the table
-    with open('sounding.csv', mode='w') as file:
+    # create a csv-file called rawdata.csv which contains the table
+    with open('rawdata.csv', mode='w') as file:
         csv_writer = csv.writer(file, delimiter=' ', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for line in pretable:
             csv_writer.writerow(line)
             
     return cut, pretable
-#%%
+
+
 def create_dataframe():
-    """Creates a pandas dataframe from the data saved in 'sounding.csv'.
+    """Creates a pandas dataframe from the data saved in 'rawdata.csv'.
     
     Returns
     -------
@@ -187,11 +195,13 @@ def create_dataframe():
     col_names = ['pres', 'hght', 'temp', 'dwpt', 'relh', 'mixr', 'drct',
                  'speed', 'thta', 'thte', 'thtv']
 
-    df = pd.read_csv('sounding.csv', sep=' ', names=col_names)
+    df = pd.read_csv('rawdata.csv', sep=' ', names=col_names)
     
     return df
-#%%
-def download_sounding(station_id=None, year=None, month=None, from_date=None, to_date=None, region=None):
+
+
+def download_sounding(station_id='11120', year=None, month=None, from_date=None,
+                      to_date=None, region='europe'):
     """Returns a dataframe with the data of the last sounding at 
     Innsbruck-Flughafen, (or when selected, of a specific sounding at a 
     specific location).
@@ -237,7 +247,8 @@ def download_sounding(station_id=None, year=None, month=None, from_date=None, to
     the sounding.
     """
 
-    url = create_url(station_id, year, month, from_date, to_date, region)
+    url = create_url(station_id=station_id, year=year, month=month,
+                     from_date=from_date, to_date=to_date, region=region)
     
     req = urlopen(Request(url)).read()
     data = req.decode('utf-8')

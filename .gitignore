@@ -1,0 +1,25 @@
+*.py[cod]
+__pycache__
+
+# PyCharm stuffs
+.idea/
+.cache/
+.pytest_cache/
+
+# coverage stuffs
+.coverage
+cover
+
+# Notebook stuffs
+examples/*checkpoints
+.ipynb_checkpoints
+
+# Packages
+*.egg
+*.egg-info
+eggs
+
+# specific
+rawdata.csv
+*.pdf
+.nbgrader.log
