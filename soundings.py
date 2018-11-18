@@ -65,7 +65,7 @@ def from_day_time(station_id=None):
     """
     hour_now = int('{:%H}'.format(datetime.datetime.now()))
     
-    if station_id == None or station_id == '11120':
+    if station_id is None or station_id is '11120':
         # if there was a sounding today (and now is later than 3 a.m.) today is
         # chosen, else yesterday for the day (as the first sounding in
         # Innsbruck takes place at 3 o'clock)
@@ -147,6 +147,7 @@ def write_csvfile(data):
     a csv-file called rawdata.csv, which contains a table of the sounding
     data.
     """
+   
     # find the first row of interest, which is the head of the table
     for element in data:
         if element == '-----------------------------------------------------------------------------':
@@ -255,6 +256,8 @@ def download_sounding(station_id='11120', year=None, month=None, from_date=None,
 
     # separate the string into rows, each row is an element in a list
     data = data.split('\n')
+    # copy the title
+    title = data[4][4:-5]
     
     # check if the data is available 
     datacheck = check_todays_sounding(data)
@@ -265,5 +268,5 @@ def download_sounding(station_id='11120', year=None, month=None, from_date=None,
     write_csvfile(data)
     df = create_dataframe()
     print('On this homepage you can find the data:\n' + url)
-
+    print('\n' + title)
     return df
