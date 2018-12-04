@@ -3,7 +3,7 @@
 """
 Sounding functions
 
-@author: Zora
+@author: Zora Schirmeister
 Created on Fri Oct 19 10:35:40 2018
 """
 
@@ -16,20 +16,40 @@ from urllib.request import Request, urlopen
 
 def create_url(station_id='11120', year=None, month=None, from_date=None,
                to_date=None, region='europe'):
-    """Returns the url for the sounding data of the chosen date and location.
+    """Returns the url for the first sounding data in a chosen time span and 
+    location.
 
     Default: The last sounding at Innsbruck Airport.
 
     Parameters
     ----------
     station_id : str
-        The id of the station.
+        The id of the station. (e.g. Innsbruck-Flughafen (default): 11120)
     year : str
         A four character string indicating the year. Default: now
-    month
-    from_date
-    to_date
-    region
+    month : str
+        A two character string indicating the month. Default: now
+    from_date : str
+        A four character string indicating the begin of a time span (day and 
+        hour (ddhh)).
+        Default: Innsbruck: 24 hours earlier than now, 
+        all other stations: 12 hours earlier than now
+    to_date : str
+        A four character string indicating the end of a time span (day and 
+        hour (ddhh)). Default: now
+    region : str
+        Has to be in accordance with station id.
+        Regions:
+        Default: europe (europe)
+        north america (naconf)
+        south america (samer)
+        south pacific (pac)
+        new zealand (nz)
+        antarctia (ant)
+        arctic (np)
+        africa (africa)
+        southeast asia (seasia)
+        mideast (mideast)
 
     Returns
     -------
@@ -57,7 +77,7 @@ def from_day_time(station_id=None):
     """Used for create_url(). Returns the keyword argument for from_date if 
     it is set to None. Returns the day and hour of the last sounding 
     (for Innsbruck Airport: sounding in the last 24 hours, 
-    all other stations: sounding in the last 12 hours).
+    all other stations: first sounding in the last 12 hours).
     
     Returns
     -------
@@ -103,18 +123,19 @@ def check_todays_sounding(lines):
     
     Parameters:
     -----------
-    lines:  string
-            data downloaded and split into rows like in table
+    lines : str
+        Data downloaded and split into rows like in table
             
     Returns:
     --------
-    boolean: if False: The data file does not have data of a sounding.
-                       comment: that says that there is not data of the last 
-                       sounding available.
-             if True: Data of the last sounding or chosen date is available.
+    boolean
+        If False: The data file does not have data of a sounding.
+            comment: that says that there is not data of the last sounding 
+            available.
+        If True: Data of the last sounding or chosen date is available.
     """
-    # If there is not available data the 5th line in the downloaded stuff will 
-    # be '<P>Description of the ', this is tested.
+    # If there is not available data: the 5th line in the downloaded stuff will 
+    # be '<P>Description of the '. This is tested.
     bad_text = '<P>Description of the '
     if lines[4] == bad_text:
         text = 'Sorry, there is no data of this sounding available. You '\
@@ -140,11 +161,11 @@ def write_csvfile(data):
     Parameters
     ----------
     data : list
-            downloaded data, already separated in rows in a list
+        Downloaded data, already separated in rows in a list
     
     Returns
     -------
-    a csv-file called rawdata.csv, which contains a table of the sounding
+    A csv-file called rawdata.csv, which contains a table of the sounding
     data.
     """
    
@@ -210,42 +231,38 @@ def download_sounding(station_id='11120', year=None, month=None, from_date=None,
     
     Parameters
     ----------
-    station_id: string
-            ID of the station: e.g. Innsbruck-Flughafen (default): 11120
-            
-    year: string
-            Format: four-digit number (e.g. 2018)
-            Default: None returns the current year.
-
-            
-    month: string
-            Format: two-digit number (e.g. 01, 02, 03, ... 12)
-            Default: None returns the current month.
-            
-    from_date: string
-            (Builds a time period with to_date in which the sounding took
-            place. The ealiest sounding in the period will be chosen.)
-            day and hour of the sounding of interest is needed
-            best: dd00 for 00:00 as start time
-            default: None returns the last sounding
-            Format: ddhh
-                
-    to_date: string
-            End of time period in which sounding took place.
-            hour of the end of period of interest is needed:
-            e.g. dd12 for until 12 o'clock
-            default: None returns the last sounding
-            Format: ddhh
-    
-    region: string
-            default: europe
-            other regions are possible, but not implemented yet
-            Format: lowercase letters
+    station_id : str
+        The id of the station. (e.g. Innsbruck-Flughafen (default): 11120)
+    year : str
+        A four character string indicating the year. Default: now
+    month : str
+        A two character string indicating the month. Default: now
+    from_date : str
+        A four character string indicating the begin of a time span (day and 
+        hour (ddhh)).
+        Default: Innsbruck: 24 hours earlier than now, 
+        all other stations: 12 hours earlier than now
+    to_date : str
+        A four character string indicating the end of a time span (day and 
+        hour (ddhh)). Default: now
+    region : str
+        Has to be in accordance with station id.
+        Regions:
+        Default: europe (europe)
+        north america (naconf)
+        south america (samer)
+        south pacific (pac)
+        new zealand (nz)
+        antarctia (ant)
+        arctic (np)
+        africa (africa)
+        southeast asia (seasia)
+        mideast (mideast)
     
     Returns
     -------
-    a pandas dataframe with the sounding data and the link to the homepage of 
-    the sounding.
+    A pandas dataframe with the sounding data and the link to the homepage of 
+    the data.
     """
 
     url = create_url(station_id=station_id, year=year, month=month,
