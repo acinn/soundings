@@ -1,9 +1,0 @@
-name: soundings-env
-channels:
-  - conda-forge
-dependencies:
-  - numpy
-  - matplotlib=2.2.3
-  - metpy
-  - pandas
-
